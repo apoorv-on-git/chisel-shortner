@@ -8,6 +8,7 @@
     "gatsby"
   ],
   "scripts": {
+    "postinstall": "cd backend && npm install",
     "develop": "gatsby develop",
     "start": "gatsby develop",
     "build": "gatsby build",
@@ -15,10 +16,12 @@
     "clean": "gatsby clean"
   },
   "dependencies": {
+    "bootstrap": "^5.1.3",
     "gatsby": "^4.16.0",
     "gatsby-source-filesystem": "^4.16.0",
     "gatsby-transformer-remark": "^5.16.0",
     "react": "^18.1.0",
+    "react-bootstrap": "^2.4.0",
     "react-dom": "^18.1.0"
   }
 }
