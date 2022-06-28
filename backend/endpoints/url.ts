@@ -24,9 +24,16 @@ const handleGet: Handler = async req => {
   }
 }
 
+const handleDelete: Handler = async req => {
+  const payload = await req.json()
+  await UrlSlug.delete({id: payload.id})
+  return responseFromJson("deleted " + payload.id)
+}
+
 const handlers: Record<string, Handler> = {
   POST: handlePost,
   GET: handleGet,
+  DELETE: handleDelete
 }
 
 export default async function chisel(req: Request, res: Response) {

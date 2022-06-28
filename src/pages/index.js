@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import {Row, Col, Button, Table} from "react-bootstrap"
 
 import api from "../services/api"
@@ -29,11 +29,12 @@ const tableLayout = {
 
 const tableCol = {
     textAlign: "center",
+    width: "33%"
 }
 
 export const getUrlsFromChisel = async () => {
     try {
-        const res = await api.get("urls", {})
+        const res = await api.get("url", {})
         return res.data
     } catch (error) {
         console.error(error)
@@ -43,6 +44,8 @@ export const getUrlsFromChisel = async () => {
 // markup
 export default function IndexPage() {
     const [urls, setUrls] = useState([])
+    const [newSlug, setNewSlug] = useState("")
+    const [newUrl, setNewUrl] = useState("")
 
     useEffect(() => {
         const getUrls = async () => {
@@ -50,8 +53,40 @@ export default function IndexPage() {
         }
         getUrls()
     })
+
+    const handleChangeNewSlug = useCallback(event => {
+        setNewSlug(event.target.value)
+    }, [])
+
+    const handleChangeNewUrl = useCallback(event => {
+        setNewUrl(event.target.value)
+    }, [])
+
+    const handleUrlCreation = useCallback(async () => {
+        try {
+            await api.post("url", {
+                slug: newSlug,
+                url: newUrl,
+            })
+            setUrls(await getUrlsFromChisel())
+        } catch (error) {
+          console.error(error)
+        }
+        setNewUrl("")
+        setNewSlug("")
+    }, [setUrls, newSlug, newUrl])
+
+    const handleUrlDelete = useCallback(async (urlId) => {
+        try {
+            await api.delete(`url`, {
+                id: urlId
+            })
+            setUrls(await getUrlsFromChisel())
+        } catch (error) {
+            console.log(error)
+        }
+    })
     
-    console.log(urls)
     return (
         <div>
         {
@@ -69,13 +104,25 @@ export default function IndexPage() {
                 </Row>
                 <Row>
                     <Col style={textCenter}>
-                        <input style={inputBox} type="text" id="slug" placeholder="Enter A Slug" />
+                        <input 
+                            style={inputBox}
+                            onChange={handleChangeNewSlug}
+                            value={newSlug}
+                            type="text"
+                            placeholder="Enter A Slug" 
+                        />
                     </Col>
                     <Col style={textCenter}>
-                        <input style={inputBox} type="text" id="url" placeholder="Enter A URL" />
+                        <input
+                            style={inputBox}
+                            onChange={handleChangeNewUrl}
+                            value={newUrl}
+                            type="text"
+                            placeholder="Enter A URL"
+                        />
                     </Col>
                     <Col style={textCenter}>
-                        <Button style={submitButton}>SAVE</Button>
+                        <Button onClick={handleUrlCreation} style={submitButton}>SAVE</Button>
                     </Col>
                 </Row>
                 <hr />
@@ -93,13 +140,21 @@ export default function IndexPage() {
                                     <tr>
                                         <td style={tableCol}><h2>URL</h2></td>
                                         <td style={tableCol}><h2>Slug</h2></td>
+                                        <td style={tableCol}><h2>Action</h2></td>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td style={tableCol}>Testing</td>
-                                        <td style={tableCol}>Testing</td>
-                                    </tr>
+                                    {
+                                        urls.map(url => (
+                                            <tr>
+                                                <td style={tableCol}>{url.url}</td>
+                                                <td style={tableCol}>{url.slug}</td>
+                                                <td style={tableCol}>
+                                                    <Button onClick={() => handleUrlDelete(url.id)}>DELETE</Button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    }
                                 </tbody>
                             </Table>
                         }
